@@ -13,11 +13,12 @@ import Layout from '../layouts/Layout.astro';
 
 	<script>
 		import { tsParticles } from "@tsparticles/engine";
-		import { loadFireworksPreset } from "@tsparticles/preset-fireworks";
+		// import { loadFireworksPreset } from "@tsparticles/preset-fireworks";
+		import { loadSeaAnemonePreset } from "@tsparticles/preset-sea-anemone";
 		
 		(async () => {
-			let dateStr = "January 1 2024 00:00:00 GMT-0500 (EST)";
-			// let dateStr = "December 31 2023 21:43:00 GMT-0500 (EST)";
+			// let dateStr = "January 12 2024 00:00:00 GMT-0500 (EST)";
+			let dateStr = "January 1 2024 02:14:20 GMT-0500 (EST)";
 			let then = Number(new Date(dateStr));
 			let div = document.getElementById("hours") as HTMLElement;
 
@@ -31,15 +32,15 @@ import Layout from '../layouts/Layout.astro';
 					blink();
 
 					setTimeout(async () => {
-						await loadFireworksPreset(tsParticles);
+						await loadSeaAnemonePreset(tsParticles);
 
 						await tsParticles.load({
 							options: {
-								preset: "fireworks",
+								preset: "seaAnemone",
 								particles: {
 									move: {
 										trail: {
-											enable: false
+											enable: true
 										}
 									}
 								}
@@ -51,19 +52,22 @@ import Layout from '../layouts/Layout.astro';
 					let s = ms / 1000
 					let m = s / 60;
 					let h = m / 60;
+					let d = h / 24;
 
 					let lll = (ms % 1000).toString().padStart(3, "0");
 					let ss = Math.floor(s % 60).toString().padStart(2, "0");
 					let mm = Math.floor(m % 60).toString().padStart(2, "0");
-					let hh = Math.floor(h).toString().padStart(2, "0");
+					let hh = Math.floor(h % 24).toString().padStart(2, "0");
+					let dd = Math.floor(d).toString().padStart(2, "0");
 
-					div.innerHTML = `${hh}:${mm}:${ss}.${lll}`;
+					div.innerHTML = `${dd ? `${dd}:` : ""}${hh}:${mm}:${ss}.${lll}`;
 					document.title = `${hh}:${mm}:${ss}.${lll}`;
 				}
 			});
 
 			function blink() {
-				div.hidden = !div.hidden;
+				if (div.style.opacity == "1") div.style.opacity = "0";
+				else div.style.opacity = "1";
 				setTimeout(() => {
 					blink();
 				}, 500);
@@ -83,5 +87,6 @@ import Layout from '../layouts/Layout.astro';
 
 	.timer {
 		z-index: 1000;
+		transition: opacity 200ms;
 	}
 </style>

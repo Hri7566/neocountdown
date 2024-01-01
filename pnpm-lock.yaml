@@ -14,6 +14,9 @@ dependencies:
   '@tsparticles/preset-fireworks':
     specifier: ^3.0.1
     version: 3.0.1
+  '@tsparticles/preset-sea-anemone':
+    specifier: ^3.0.1
+    version: 3.0.1
   astro:
     specifier: ^4.0.8
     version: 4.0.8(typescript@5.3.3)
@@ -1050,6 +1053,12 @@ packages:
       '@tsparticles/engine': 3.0.3
     dev: false
 
+  /@tsparticles/path-curves@3.0.3:
+    resolution: {integrity: sha512-LqH0VOSNY7wqKpn4wJ2GHoFBJzTI0JVBG0NaqiD3E69+yknVIrsMg5CEzTQhV1gHXx5vwxwUje8cXT0fydIMQw==}
+    dependencies:
+      '@tsparticles/engine': 3.0.3
+    dev: false
+
   /@tsparticles/plugin-absorbers@3.0.3:
     resolution: {integrity: sha512-mpAgIRdAmbb3+SX3KNGbmS0YsMJYx711/dV3e3kCu1M/k7ptFze/oFDLMb1f3614WWRlJCwQGdtmAAv517tpWg==}
     dependencies:
@@ -1101,6 +1110,15 @@ packages:
       '@tsparticles/updater-life': 3.0.3
       '@tsparticles/updater-rotate': 3.0.3
       '@tsparticles/updater-stroke-color': 3.0.3
+    dev: false
+
+  /@tsparticles/preset-sea-anemone@3.0.1:
+    resolution: {integrity: sha512-SwKJnBJZQWfNHAhnb39ANZxQGySgLd+0HmnRyy/miPvv/jO6sBvIeTTdakegAmFFeST/7uSwGhtoiY+8ql8VfA==}
+    dependencies:
+      '@tsparticles/basic': 3.0.3
+      '@tsparticles/engine': 3.0.3
+      '@tsparticles/path-curves': 3.0.3
+      '@tsparticles/plugin-emitters': 3.0.3
     dev: false
 
   /@tsparticles/shape-circle@3.0.3:
