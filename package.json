@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.3.4",
-    "@tsparticles/engine": "^3.0.3",
-    "@tsparticles/preset-confetti": "^3.0.2",
-    "@tsparticles/preset-fireworks": "^3.0.1",
-    "astro": "^4.0.8",
-    "tsparticles": "^3.0.3",
-    "typescript": "^5.3.3"
+    "@tsparticles/engine": "^3.5.0",
+    "@tsparticles/preset-confetti": "^3.1.0",
+    "@tsparticles/preset-fireworks": "^3.1.0",
+    "astro": "^4.15.9",
+    "tsparticles": "^3.5.0",
+    "typescript": "^5.6.2"
   }
 }

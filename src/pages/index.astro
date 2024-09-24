@@ -1,76 +1,86 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout title="Neocountdown">
+  <main>
+    <div
+      class="timer-container"
+      style="margin-top: auto; margin-bottom: auto; width: 100%; height: 100%;"
+    >
+      <div id="hours" class="code-font timer">00:00:00.000</div>
+    </div>
+  </main>
 
-	<main>
-		<div class="timer-container" style="margin-top: auto; margin-bottom: auto; width: 100%; height: 100%;">
-			<div id="hours" class="code-font timer">00:00:00.000</div>
-		</div>
-	</main>
+  <script>
+    (async () => {
+      let dateStr = "Wed Jan 1 00:00:00 2025 -0500";
+      let then = Number(new Date(dateStr));
+      let div = document.getElementById("hours") as HTMLElement;
+      let shouldUpdate = true;
 
-	<script>
-		(async () => {
-			let dateStr = "Sun Feb 11 00:47:12 2024 -0500";
-			let then = Number(new Date(dateStr));
-			let div = document.getElementById("hours") as HTMLElement;
-			let shouldUpdate = true;
+      let updateInterval = async function () {
+        let now = Date.now();
+        let ms = then - now;
 
-			let updateInterval = async function() {
-				let now = Date.now();
-				let ms = now - then;
+        if (ms <= 0) {
+          div.innerHTML = "00:00:00.000";
+          // clearInterval(updateInterval);
+          shouldUpdate = false;
+          blink();
+        } else {
+          let s = ms / 1000;
+          let m = s / 60;
+          let h = m / 60;
+          let d = h / 24;
 
-				if (ms <= 0) {
-					div.innerHTML = "00:00:00.000";
-					// clearInterval(updateInterval);
-					shouldUpdate = false;
-					blink();
-				} else {
-					let s = ms / 1000
-					let m = s / 60;
-					let h = m / 60;
-					let d = h / 24;
+          let lll = (ms % 1000).toString().padStart(3, "0");
+          let ss = Math.floor(s % 60)
+            .toString()
+            .padStart(2, "0");
+          let mm = Math.floor(m % 60)
+            .toString()
+            .padStart(2, "0");
+          let hh = Math.floor(h % 24)
+            .toString()
+            .padStart(2, "0");
+          let dd = Math.floor(d).toString().padStart(2, "0");
 
-					let lll = (ms % 1000).toString().padStart(3, "0");
-					let ss = Math.floor(s % 60).toString().padStart(2, "0");
-					let mm = Math.floor(m % 60).toString().padStart(2, "0");
-					let hh = Math.floor(h % 24).toString().padStart(2, "0");
-					let dd = Math.floor(d).toString().padStart(2, "0");
+          div.innerHTML = `${dd ? `${dd}:` : ""}${hh}:${mm}:${ss}.${lll}`;
+          document.title = `${dd}:${hh}:${mm}:${ss}.${lll}`;
+        }
 
-					div.innerHTML = `${dd ? `${dd}:` : ""}${hh}:${mm}:${ss}.${lll}`;
-					document.title = `${dd}:${hh}:${mm}:${ss}.${lll}`;
-				}
+        if (shouldUpdate)
+          requestAnimationFrame(async () => {
+            await updateInterval();
+          });
+      };
 
-				if (shouldUpdate) requestAnimationFrame(async () => {
-					await updateInterval();
-				});
-			}
+      if (shouldUpdate)
+        requestAnimationFrame(async () => {
+          await updateInterval();
+        });
 
-			if (shouldUpdate) requestAnimationFrame(async () => {
-				await updateInterval();
-			});
-
-			function blink() {
-				div.hidden = !div.hidden;
-				setTimeout(() => {
-					blink();
-				}, 500);
-			}
-		})();
-	</script>
+      function blink() {
+        div.hidden = !div.hidden;
+        setTimeout(() => {
+          blink();
+        }, 500);
+      }
+    })();
+  </script>
 </Layout>
 
 <style>
-	main {
-		margin: 0;
-		padding: 1rem;
-		width: 100%;
-		max-width: calc(100% - 2rem);
-		color: white;
-	}
+  main {
+    margin: 0;
+    padding: 1rem;
+    width: 100%;
+    max-width: calc(100% - 2rem);
+    color: white;
+  }
 
-	.timer {
-		z-index: 1000;
-	}
+  .timer {
+    z-index: 1000;
+  }
 </style>
