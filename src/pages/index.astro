@@ -1,5 +1,26 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { readFileSync } from "fs";
+
+const scheduleName = "Break Schedule 4";
+
+const scheduleText = readFileSync(`./${scheduleName}.csv`).toString();
+const lines = scheduleText.split("\r\n").join("\n").split("\n");
+const scheduleData = lines.slice(1, -1).map((l: string) => l.split(","));
+
+const schedule = scheduleData.map((row: string[]) => {
+  return {
+    day: row[0],
+    shiftStart: row[1],
+    shiftEnd: row[2],
+    break1Start: row[3],
+    break1Length: row[4],
+    break2Start: row[5],
+    break2Length: row[6],
+    break3Start: row[7],
+    break3Length: row[8],
+  };
+});
 ---
 
 <Layout title="Neocountdown">
@@ -8,26 +29,237 @@ import Layout from "../layouts/Layout.astro";
       class="timer-container"
       style="margin-top: auto; margin-bottom: auto; width: 100%; height: 100%;"
     >
-      <div id="hours" class="code-font timer">00:00:00.000</div>
+      <div class="code-font timer">
+        <p id="day-text"></p>
+        <p id="break-text" style="opacity: 0;">(on break)</p>
+        <p id="hours">00:00:00:00.000</p>
+        <div id="mode" class="code-font"></div>
+      </div>
     </div>
   </main>
 
-  <script>
-    (async () => {
+  <script define:vars={{ schedule }}>
+    let timeOffset = 0;
+
+    function dayNameToNum(str) {
+      switch (str) {
+        case "Sunday":
+          return 0;
+        case "Monday":
+          return 1;
+        case "Tuesday":
+          return 2;
+        case "Wednesday":
+          return 3;
+        case "Thursday":
+          return 4;
+        case "Friday":
+          return 5;
+        case "Saturday":
+          return 6;
+      }
+    }
+
+    function getDayOffset(day1, day2) {
+      let num = day1;
+      let count = 0;
+
+      while (num !== day2) {
+        num += 1;
+        num %= 7;
+        count++;
+      }
+
+      return count;
+    }
+
+    function getTimeStr(str, days, now) {
+      let date = now.toLocaleString().split(",")[0];
+      let parts = date.split("/");
+      parts[1] = parseInt(parts[1]) + days;
+      date = parts.join("/") + `, ${str}`;
+      console.log(date);
+      return date;
+    }
+
+    let hours = document.getElementById("hours");
+    let breakText = document.getElementById("break-text");
+    let dayText = document.getElementById("day-text");
+
+    function onBreak() {
+      hours.classList.add("on-break");
+      breakText.style.opacity = 1;
+    }
+
+    function offBreak() {
+      hours.classList.add("off-break");
+      breakText.style.opacity = 1;
+    }
+
+    async function update() {
+      stopBlink();
+
+      setTimeout(() => {
+        blinkOff = false;
+      }, 1000);
+
+      let realNow = Date.now();
+      let now = new Date(realNow + timeOffset);
+
+      let day;
+      let dayIndex = 0;
+
+      for (const date of schedule) {
+        console.log("day of week:", now.getDay());
+        console.log("comparison:", dayNameToNum(date.day));
+        if (dayNameToNum(date.day) == now.getDay()) {
+          day = date;
+          break;
+        }
+
+        dayIndex++;
+      }
+
+      console.log(day);
+
+      let mode = "before";
+
+      if (day) {
+        dayText.innerText = day.day;
+
+        if (now > new Date(getTimeStr(day.shiftStart, 0, now))) {
+          mode = "started";
+        }
+
+        if (now > new Date(getTimeStr(day.break1Start, 0, now))) {
+          mode = "break1";
+        }
+
+        if (
+          now >
+          Number(new Date(getTimeStr(day.break1Start, 0, now))) +
+            day.break1Length * 60 * 1000
+        ) {
+          mode = "break1ended";
+        }
+
+        if (now > new Date(getTimeStr(day.break2Start, 0, now))) {
+          mode = "break2";
+        }
+
+        if (
+          now >
+          Number(new Date(getTimeStr(day.break2Start, 0, now))) +
+            day.break2Length * 60 * 1000
+        ) {
+          mode = "break2ended";
+        }
+
+        if (now > new Date(getTimeStr(day.break3Start, 0, now))) {
+          mode = "break3";
+        }
+
+        if (
+          now >
+          Number(new Date(getTimeStr(day.break3Start, 0, now))) +
+            day.break3Length * 60 * 1000
+        ) {
+          mode = "break3ended";
+        }
+
+        if (now > new Date(getTimeStr(day.shiftEnd, 0, now))) {
+          mode = "ended";
+        }
+      }
+
+      console.log(mode);
       let dateStr = "Wed Jan 1 00:00:00 2025 -0500";
-      let then = Number(new Date(dateStr));
-      let div = document.getElementById("hours") as HTMLElement;
+
+      if (day) {
+        switch (mode) {
+          case "before":
+            dateStr = getTimeStr(day.shiftStart, 0, now);
+            offBreak();
+            break;
+          case "started":
+            dateStr = getTimeStr(day.break1Start, 0, now);
+            offBreak();
+            break;
+          case "break1":
+            dateStr =
+              Number(new Date(getTimeStr(day.break1Start, 0, now))) +
+              day.break1Length * 60 * 1000;
+            onBreak();
+            break;
+          case "break1ended":
+            dateStr = getTimeStr(day.break2Start, 0, now);
+            offBreak();
+            break;
+          case "break2":
+            dateStr =
+              Number(new Date(getTimeStr(day.break2Start, 0, now))) +
+              day.break2Length * 60 * 1000;
+            onBreak();
+            break;
+          case "break2ended":
+            dateStr = getTimeStr(day.break3Start, 0, now);
+            offBreak();
+            break;
+          case "break3":
+            dateStr =
+              Number(new Date(getTimeStr(day.break3Start, 0, now))) +
+              day.break3Length * 60 * 1000;
+            onBreak();
+            break;
+          case "break3ended":
+            dateStr = getTimeStr(day.shiftEnd, 0, now);
+            offBreak();
+            break;
+          case "ended":
+            let dayIndex2 = (dayIndex + 1) % schedule.length;
+            let day2 = schedule[dayIndex2];
+
+            let numDays = getDayOffset(
+              dayNameToNum(day.day),
+              dayNameToNum(day2.day)
+            );
+
+            // console.log(day2);
+
+            if (day.day !== day2.day) {
+              dateStr = getTimeStr(day2.shiftStart, numDays, now);
+            } else {
+              dateStr = getTimeStr(day.shiftStart, 0, now);
+            }
+
+            break;
+        }
+      } else {
+        let dayIndex2 = 0;
+        let day2 = schedule[dayIndex2];
+        let numDays = getDayOffset(now.getDay(), dayNameToNum(day2.day));
+        dateStr = getTimeStr(day2.shiftStart, 1, now);
+      }
+
+      // console.log(dateStr);
+
+      let then = new Date(dateStr);
+      console.log(Date.now(), Number(now), then);
       let shouldUpdate = true;
 
       let updateInterval = async function () {
-        let now = Date.now();
-        let ms = then - now;
+        let realNow = Date.now();
+        let now = new Date(realNow + timeOffset);
+        let ms = Number(then) - Number(now);
 
         if (ms <= 0) {
-          div.innerHTML = "00:00:00.000";
+          hours.innerHTML = "00:00:00:00.000";
           // clearInterval(updateInterval);
           shouldUpdate = false;
           blink();
+          setTimeout(() => {
+            update();
+          }, 5000);
         } else {
           let s = ms / 1000;
           let m = s / 60;
@@ -46,8 +278,43 @@ import Layout from "../layouts/Layout.astro";
             .padStart(2, "0");
           let dd = Math.floor(d).toString().padStart(2, "0");
 
-          div.innerHTML = `${dd ? `${dd}:` : ""}${hh}:${mm}:${ss}.${lll}`;
+          hours.innerHTML = `${dd ? `${dd}:` : ""}${hh}:${mm}:${ss}.${lll}`;
           document.title = `${dd}:${hh}:${mm}:${ss}.${lll}`;
+        }
+
+        let modeEle = document.getElementById("mode");
+
+        switch (mode) {
+          case "before":
+            modeEle.innerText = "until shift starts";
+            break;
+          case "started":
+            modeEle.innerText = `until ${day.break1Length} minute break starts`;
+            break;
+          case "break1":
+            modeEle.innerText = `until ${day.break1Length} minute break ends`;
+            break;
+          case "break1ended":
+            modeEle.innerText = `until ${day.break2Length} minute break starts`;
+            break;
+          case "break2":
+            modeEle.innerText = `until ${day.break2Length} minute break ends`;
+            break;
+          case "break2ended":
+            modeEle.innerText = `until ${day.break3Length} minute break starts`;
+            break;
+          case "break3":
+            modeEle.innerText = `until ${day.break3Length} minute break ends`;
+            break;
+          case "break3ended":
+            modeEle.innerText = `until end of shift`;
+            break;
+          case "ended":
+            modeEle.innerText = `until next shift`;
+            break;
+          default:
+            modeEle.innerText = `<unknown status>`;
+            break;
         }
 
         if (shouldUpdate)
@@ -62,12 +329,23 @@ import Layout from "../layouts/Layout.astro";
         });
 
       function blink() {
-        div.hidden = !div.hidden;
+        // div.hidden = !div.hidden;
+        if (!hours.style.opacity) hours.style.opacity = 1;
+        hours.style.opacity = -hours.style.opacity;
+
+        if (blinkOff) return;
+
         setTimeout(() => {
           blink();
         }, 500);
       }
-    })();
+
+      function stopBlink() {
+        blinkOff = true;
+      }
+    }
+
+    update();
   </script>
 </Layout>
 
@@ -82,5 +360,22 @@ import Layout from "../layouts/Layout.astro";
 
   .timer {
     z-index: 1000;
+  }
+
+  #hours.on-break {
+    color: #1aff99;
+  }
+
+  #mode {
+    font-size: 24pt;
+  }
+
+  #break-text {
+    color: #1aff99;
+    font-size: 24pt;
+  }
+
+  #day-text {
+    font-size: 24pt;
   }
 </style>
