@@ -88,19 +88,35 @@ const schedule = scheduleData.map((row: string[]) => {
 
     function onBreak() {
       hours.classList.add("on-break");
+      breakText.innerText = "(on break)";
       breakText.style.opacity = 1;
+      breakText.style.color = "#1aff99";
     }
 
     function offBreak() {
-      hours.classList.add("off-break");
+      hours.classList.remove("on-break");
+      breakText.innerText = "(off break)";
       breakText.style.opacity = 1;
+      breakText.style.color = "#white";
+    }
+
+    function beforeShift() {
+      hours.classList.remove("on-break");
+      breakText.innerText = "(before shift)";
+      breakText.style.opacity = 1;
+      breakText.style.color = "white";
     }
 
     async function update() {
       stopBlink();
 
       setTimeout(() => {
+        update();
+      }, 15000);
+
+      setTimeout(() => {
         blinkOff = false;
+        hours.style.opacity = 1;
       }, 1000);
 
       let realNow = Date.now();
@@ -179,7 +195,7 @@ const schedule = scheduleData.map((row: string[]) => {
         switch (mode) {
           case "before":
             dateStr = getTimeStr(day.shiftStart, 0, now);
-            offBreak();
+            beforeShift();
             break;
           case "started":
             dateStr = getTimeStr(day.break1Start, 0, now);
@@ -342,6 +358,7 @@ const schedule = scheduleData.map((row: string[]) => {
 
       function stopBlink() {
         blinkOff = true;
+        hours.style.opacity = 1;
       }
     }
 
@@ -371,7 +388,7 @@ const schedule = scheduleData.map((row: string[]) => {
   }
 
   #break-text {
-    color: #1aff99;
+    /* color: #1aff99; */
     font-size: 24pt;
   }
 
