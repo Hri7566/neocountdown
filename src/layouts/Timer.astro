@@ -2,9 +2,10 @@
 import Layout from "./Layout.astro";
 import { readFileSync } from "fs";
 
-const { scheduleFile, scheduleName, title } = Astro.props;
+const { scheduleFile, title } = Astro.props;
 const scheduleText = readFileSync(scheduleFile).toString();
 const lines = scheduleText.split("\r\n").join("\n").split("\n");
+const scheduleName = lines[0];
 const scheduleData = lines.slice(1, -1).map((l: string) => l.split(","));
 
 const schedule = scheduleData.map((row: string[]) => {
