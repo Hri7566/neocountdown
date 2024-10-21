@@ -31,7 +31,7 @@ const schedule = scheduleData.map((row: string[]) => {
     >
       <div class="code-font timer">
         <p id="day-text" class="small-text"></p>
-        <p id="break-text" class="small-text" style="opacity: 0;">(on break)</p>
+        <p id="break-text" class="small-text" style="opacity: 0;"></p>
         <p id="hours">00:00:00.000</p>
         <div id="mode" class="code-font small-text"></div>
         <p id="schedule-text" class="mini-text">{scheduleName}</p>
@@ -39,26 +39,25 @@ const schedule = scheduleData.map((row: string[]) => {
     </div>
   </main>
 
-  <script define:vars={{ schedule }}>
+  <script is:inline define:vars={{ schedule }}>
     let timeOffset = 0;
 
+    const dayNameNums = {
+      Sunday: 0,
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+    };
+
+    function dayNumToName(num) {
+      return Object.keys(dayNameNums).find((key) => dayNameNums[key] == num);
+    }
+
     function dayNameToNum(str) {
-      switch (str) {
-        case "Sunday":
-          return 0;
-        case "Monday":
-          return 1;
-        case "Tuesday":
-          return 2;
-        case "Wednesday":
-          return 3;
-        case "Thursday":
-          return 4;
-        case "Friday":
-          return 5;
-        case "Saturday":
-          return 6;
-      }
+      return dayNameNums[str];
     }
 
     function getDayOffset(day1, day2) {
